@@ -21,10 +21,17 @@ func main() {
 		cancel()
 	}()
 
+	var err error
 	go func() {
 		r := repl.New()
-		r.Run(ctx)
+		err = r.Run(ctx)
+		if err != nil {
+			cancel()
+		}
 	}()
 
 	<-ctx.Done()
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+	}
 }
