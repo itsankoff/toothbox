@@ -4,14 +4,21 @@ package repl
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"os"
+)
+
+var (
+	// ErrQuit is returned if the .quit command is called
+	ErrQuit = errors.New("repl: quit")
 )
 
 // Repl is implementation of REPL (Read-Eval-Print Loop)
 type Repl struct {
 	input  *bufio.Reader
 	prefix string
+	echo   bool
 }
 
 // New creates a new Repl instance
@@ -38,9 +45,41 @@ func (r *Repl) Run(ctx context.Context) error {
 				return err
 			}
 
-			fmt.Print(line)
+			if err := r.handleInput(line[:len(line)-1]); err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
+}
+
+func (r *Repl) handleInput(in string) error {
+	if r.echo {
+		fmt.Println(in)
+	}
+
+	switch in {
+	case "@echo on":
+		r.echo = true
+	case "@echo off":
+		r.echo = false
+	case ".help":
+		r.printHelp()
+	case ".quit":
+		return ErrQuit
+	default:
+		fmt.Printf("Unrecognized command: %s\n", in)
+	}
+
+	return nil
+}
+
+func (r *Repl) printHelp() {
+	fmt.Println(`
+.help - print help
+.quit - quit program
+@echo on - turn on echo
+@echo off - turn off echo
+`)
 }

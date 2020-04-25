@@ -26,12 +26,18 @@ func main() {
 		r := repl.New()
 		err = r.Run(ctx)
 		if err != nil {
+			if err != repl.ErrQuit {
+				fmt.Println(err)
+			} else {
+				err = nil
+			}
+
 			cancel()
 		}
 	}()
 
 	<-ctx.Done()
 	if err != nil {
-		fmt.Printf("Error: %v", err)
+		fmt.Printf("Error: %v\n", err)
 	}
 }
