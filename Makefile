@@ -17,3 +17,6 @@ clean:
 
 clean.full:
 	@rm -rf ./bin/*
+
+run: build
+	@./bin/toothbox
